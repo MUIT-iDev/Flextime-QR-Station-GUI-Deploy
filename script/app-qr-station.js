@@ -41,20 +41,24 @@ class Props {
 
   //@ +Props.displaySettedSignMode: แสดงผลการ Set Sign Mode
   static displaySettedSignMode(signMode) {
-    let sign = this.opt.sign[signMode];
+    //Set style btn click active & diable all
+    $(`button[${this.prop.set}="${this.opt.signMode}"][${this.prop.mode}="${signMode}"]`).addClass('btn-light font-weight-bold text-primary');
     $(`button[${this.prop.set}="${this.opt.signMode}"]`).prop("disabled", true);
+   
+    let sign = this.opt.sign[signMode];
     $(`#${this.opt.disp.status}`)
       .removeClass("alert-danger alert-success")
       .addClass("alert-primary")
       .show().html(`
-          <strong>Set:  ${sign.userkey} (${sign.mode.toUpperCase()})</strong>
+      <span class="font-mdb">Set - ${sign.userkey} (${sign.mode.toUpperCase()})</span>
     `);
   }
 
   //@ +Props.unDisplaySettedSignMode: แสดงผลการสิ้นสุด Set Sign Mode
   static unDisplaySettedSignMode(signModeSelect) {
+    $(`button[${this.prop.set}="${this.opt.signMode}"]`).removeClass('btn-light font-weight-bold text-primary');
     $(`button[${this.prop.set}="${this.opt.signMode}"]`).prop("disabled", false);
-    $(`#${this.opt.disp.status}`).hide();
+    $(`#${this.opt.disp.status}`).empty().hide();
   }
 
   //@ +Props.displaySettedSignMode: แสดงผลการ Set Sign Mode + Suscess
@@ -63,28 +67,28 @@ class Props {
       .removeClass("alert-danger alert-primary")
       .addClass("alert-success")
       .show().html(`
-          <strong>บันทึกสำเร็จ (Save Suceessfully)</strong>
+          <span class="font-mdlb">บันทึกสำเร็จ (Save Successfully)</span>
     `);
   }
 
   //@ +Props.unDisplaySettedSignModeSuccess: แสดงผลการสิ้นสุด Set Sign Mode + Suscess
   static unDisplaySettedSignModeSuccess() {
-    $(`#${this.opt.disp.status}`).hide();
+    $(`#${this.opt.disp.status}`).empty().hide();
   }
 
   //@ +Props.displayScannedSign: แสดงผลการสแกน QR Code เพื่อลงเวลา
   static displayScannedSign(data) {
     let signMode = data.sign.mode.toUpperCase();
-    $(`#${this.opt.disp.sign}`).html(`<span class="font-smb">Time      : </span> <span class="font-smb text-primary">${data.regisTime}</span><br/>
-    <span class="font-smb">Fullname  : </span> <span class="font-sm text-primary">${data.fullname} </span><br/>
-    <span class="font-sxb">Card Id   : </span> <span class="font-sx text-primary">${ data.cardId} </span><br/>
-    <span class="font-sxb">Sign Mode : </span> <span class="font-sx text-primary">${data.sign.userkey ? data.sign.userkey.toUpperCase() +" (" + signMode +")": signMode} </span> <br/>
+    $(`#${this.opt.disp.sign}`).html(`<span class="font-mdlb">Time     : </span> <span class="font-mdlb text-primary">${data.regisTime}</span><br/>
+    <span class="font-mdlb">Name  : </span> <span class="font-mdl text-primary">${data.fullname} </span><br/>
+    <span class="font-mdb">Card Id   : </span> <span class="font-md text-primary">${ data.cardId} </span><br/>
+    <span class="font-mdb">Sign Mode : </span> <span class="font-md text-primary">${data.sign.userkey ? data.sign.userkey.toUpperCase() +" (" + signMode +")": signMode} </span> <br/>
     `);
   }
 
   //@ +Props.displayScannedSign: แสดงผลการสิ้นสุดการสแกน QR Code เพื่อลงเวลา
   static unDisplayScannedSign() {
-    $(`#${this.opt.disp.sign}`).html(`<p class="font-sm">กรุณา Scan QR Code เพื่อลงเวลา</p>`);
+    $(`#${this.opt.disp.sign}`).html(`<p class="font-md">กรุณา Scan QR Code เพื่อลงเวลา</p>`);
   }
 
   //@ +Props.displayCheckOnlineData: แสดงผล CheckOnline
@@ -103,8 +107,12 @@ class Props {
     $("#nav-bottom-limitRecord").html(`, Limit Trans: ${data.limitRecord}`);
   }
 
+  static displaySystemVersion(systemVersion){
+    $("#nav-bottom-sysVersion").html(`| <strong>Version</strong>: ${systemVersion}`);
+  }
+
   static displayLocation(data){
-    $("#nav-bottom-sysLocation").html(`| <strong>Hostname</strong> - App: ${data.app}, API: ${data.api}`);
+    $("#nav-bottom-sysLocation").html(`| <strong>Hostname</strong> - ${JSON.stringify(data)}`);
   }
 }
 
@@ -123,12 +131,8 @@ class QR {
   //@ QR +properties
   preventQRScan = false;
   signMode = Props.opt.sign.IN.mode;
-  beforeScanDo = undefined; // () => { //sannedSignDo }
-  afterScanDo = undefined; // (resp) => { //sannedSignDo }
-  finalScanDo = undefined;
-
+  actionScanDo = undefined; // ({QR.scanned, QR.status}) => { //actionScanDo }
   constructor() {
-    this.apiServ = new APIServ();
     this.audioQRStationNotReady = new Audio("audio/qr-station-not-ready.m4a");
     this.init();
   }
@@ -153,17 +157,12 @@ class QR {
 
         //ถ้า QR Scanned จบ (ไม่มีการ keypress เพิ่ม นั่นคือไม่มีการ clearTimeout ภายใน 500 mls)  ให้เรียก setTimeByQRCode
         self.#timerScanned = setTimeout(() => {
-          //beforeScanDo
-          if (self.beforeScanDo) self.beforeScanDo();
-
-          self.control({
-            action: self.apiServ.transaction.setData.name,
-            data: {
-              qr: Base64.encode(self.#scanned), // from script/base64.js
-              status: self.signMode,
-            },
-          });
-
+          if (self.actionScanDo) {
+            self.actionScanDo({
+                qr: Base64.encode(self.#scanned), // from script/base64.js
+                status: self.signMode,
+            });
+          }
           //Clear QR props
           self.#scanned = "";
           self.signMode = self.#defaultSignMode;
@@ -181,38 +180,6 @@ class QR {
     });
     //###################################//
   }
-
-  //@ +QR.control
-  control(controlParam) {
-
-    let action = controlParam.action;
-    let data = controlParam.data;
-
-    switch (action) {
-      case this.apiServ.transaction.setData.name:
-
-        if(!this.preventQRScan){
-
-          $.when(this.apiServ.transaction.setData(data,  (jqXHR ) => {
-              BlockUI.load({message: "Processing..."})
-            })
-          )
-          .done((resp) => {
-            let sign = Props.opt.sign[data.status];
-            Object.assign(resp.context, {
-              sign: { userkey: sign.userkey, mode: sign.mode },
-            });
-            this.apiServ.handleDone(resp, this.afterScanDo, this.finalScanDo);
-          })
-          .always(() => {
-              if(!this.preventQRScan){BlockUI.unload()}
-          });
-
-        }
-
-        break;
-    }
-  }
 }
 
 /***
@@ -222,7 +189,7 @@ class QR {
 class AppQRStation {
 
   //@ AppQRStation #properties
-  #letCheckFullScreen = false;
+  #letCheckFullScreen = true;
 
   #CONFIG = {
     CHECK_ONLINE_PERIOD__MSEC: 1000*60*5,
@@ -231,8 +198,11 @@ class AppQRStation {
       MINUTE: 0, 
       SECOND: 0
     },
-    F14_DELAY_SECOND__MSEC: 1000*5,
-    SCAN_DELAY_SECOND__MSEC: 1000*5,
+    F14_DELAY_SECOND__MSEC: 1000*7,
+    SCAN_DELAY_SECOND__MSEC: 1000*7,
+    STATION_ACTIVE: true, /**User ser destroy or active station */
+    STATION_NAME : "Untitle",
+    SYSTEM_VERSION : "202006251200"
   }
 
   #timerUnDisplayScannedSign = null;
@@ -241,10 +211,17 @@ class AppQRStation {
  
 
   constructor() {
-    this.qr = new QR();
-    this.timeServ = new TimeServ();
+   
+   
     this.utlServ = new UTLServ();
-    this.apiServ = new APIServ();
+    this.apiServ = new APIServ({
+      callbackError: ()=> {
+       //refresh UnDisplay signMode
+       this.controlSettedSignMode.refreshUnDisplay();
+       //UnDisplay signMode
+       this.controlSettedSignMode.unDisplay();
+      }
+    });
     this.audioRecordSuccess = new Audio("audio/qr-station-scan-success.m4a");
     this.init();
   }
@@ -252,105 +229,127 @@ class AppQRStation {
   //@ +AppQRStation.init
   init() {
     let self = this;
+    
+     //Get updateConfig
+     this.controlGetUpdateConfig();
 
-    Props.unDisplayScannedSign();
-    Props.unDisplaySettedSignMode();
 
-    //Bind click to signMode button
-    $(`button[${Props.prop.set}="${Props.opt.signMode}"]`).each(function () {
-      $(this).text(
-        `${$(this).attr(Props.prop.userkey)} (${$(this).attr(Props.prop.mode).toUpperCase()})`
-      );
-    });
-    $(`button[${Props.prop.set}="${Props.opt.signMode}"]`).on(
-      "click",
-      function () {
-        self.controlSetSignMode(this);
-      }
-    );
-
-    //Set QR.beforeScanDo  (What action before scan qr-code?)
-    this.qr.beforeScanDo = () => {
-      Props.unDisplayScannedSign();
-      Props.unDisplaySettedSignMode();
-    };
-
-    //Set QR.afterScanDo (What action after scan qr-code?)
-    this.qr.afterScanDo = (resp) => {
-      let context = resp.context;
-     
-      //Audio บันทึกสำเร็จ
-      this.audioRecordSuccess.play();
+     //Refresh UI/System checking
+     window.setInterval( () => {
+       // Set interval for refresh checking
+     let date = new Date();
+    
+       //condition currentTime == REFRESH_GUI_PERIOD
+       if (date.getHours() === this.#CONFIG.REFRESH_GUI_PERIOD.HOUR && date.getMinutes() === this.#CONFIG.REFRESH_GUI_PERIOD.MINUTE) {
+         //BlockUI and Display message
+         BlockUI.load({ css: { width: "550px" },message: "Refreshing system, please wait...", overlayCSS: { cursor: "default" } });
+         self.qr.preventQRScan = true;
+          // Reload web-app in 10 millisec
+         setTimeout(() => {
+           location.reload();
+         }, 
+         10000);
+       }
       
-     
-      //Diplay scanned-context
-      this.controlScannedSign.display(context);
+     }, 60000); // Repeat every 60000 milliseconds (1 minute)  for check condition currentTime == REFRESH_GUI_PERIOD
 
-      //UnDiplay scanned-context
-      this.controlScannedSign.refreshUnDisplay();
-      this.controlScannedSign.unDisplay();
-
-      //Diplay success
-      this.controlSettedSignModeSuccess.display();
-
-      //UnDiplay success
-      this.controlSettedSignModeSuccess.refreshUnDisplay();
-      this.controlSettedSignModeSuccess.unDisplay();
-    };
-
-    //Set QR.finalScanDo (What action final scan qr-code?)
-    this.qr.finalScanDo = () => {
-      //refresh UnDisplay signMode
-      this.controlSettedSignMode.refreshUnDisplay();
-      //UnDisplay signMode
-      this.controlSettedSignMode.unDisplay();
-    };
-
-    //Clock-time diplaying 
-    this.timeServ.clockDisp();
-
-
-    //Fullscreen checking 
-    if(this.#letCheckFullScreen) {
-      $(document).ready(function () {
-        self.checkFullscreen();
-        $(window).on("resize", function () {
-          self.checkFullscreen();
-        });
-      });
-    }
-
-    //Get updateConfig
-    this.controlUpdateConfig();
-
-
-    //Refresh UI/System checking
-    window.setInterval( () => {
-      // Set interval for refresh checking
-    let date = new Date();
-    //console.log({d: {h: date.getHours(), m: date.getMinutes()}, cref:{h:this.#CONFIG.REFRESH_GUI_PERIOD.HOUR, m:this.#CONFIG.REFRESH_GUI_PERIOD.MINUTE}});
-      //condition currentTime == REFRESH_GUI_PERIOD
-      if (date.getHours() === this.#CONFIG.REFRESH_GUI_PERIOD.HOUR && date.getMinutes() === this.#CONFIG.REFRESH_GUI_PERIOD.MINUTE) {
-        //BlockUI and Display message
-        BlockUI.load({ css: { width: "550px" },message: "Refreshing system, please wait...", overlayCSS: { cursor: "default" } });
-        self.qr.preventQRScan = true;
-         // Reload web-app
-        setTimeout(() => {
-          location.reload();
-        }, 
-        10000);
-      }
-     
-    }, 60000); // Repeat every 60000 milliseconds (1 minute)  for check condition currentTime == REFRESH_GUI_PERIOD
-
-   //checkOnline 
-   this.checkOnline();
+     //checkOnline 
+    this.checkOnline();
     window.setInterval(() => {
       this.checkOnline()
     }, 
     this.#CONFIG.CHECK_ONLINE_PERIOD__MSEC)  // Repeat every 60000 milliseconds (1 minute) * 5 (5 minute)
-    
-    Props.displayLocation(this.apiServ.gethostName);
+
+    if(!this.#CONFIG.STATION_ACTIVE) {
+      $("#station-load").remove();
+      $("#station-in-active").show();
+      $("#station-active").hide();
+     
+    }else {
+
+      this.qr = new QR();
+      this.timeServ = new TimeServ();
+      $("#station-load").remove();
+      $("#station-active").show();
+      $("#station-in-active").hide();
+
+      Props.unDisplayScannedSign();
+      Props.unDisplaySettedSignMode();
+
+      //Bind click to signMode button
+      $(`button[${Props.prop.set}="${Props.opt.signMode}"]`).each(function () {
+        $(this).text(
+          `${$(this).attr(Props.prop.userkey)} (${$(this).attr(Props.prop.mode).toUpperCase()})`
+        );
+      });
+      $(`button[${Props.prop.set}="${Props.opt.signMode}"]`).on(
+        "click",
+        function () {
+          self.controlSetSignMode(this);
+        }
+      );
+
+      //QR.actionScanDo ({QR.scanned, QR.status})
+      this.qr.actionScanDo = (data) => {
+        if(!this.qr.preventQRScan){
+            this.apiServ.transaction.setData(data,  (jqXHR ) => {
+                Props.unDisplayScannedSign();
+                Props.unDisplaySettedSignMode();
+                BlockUI.load({message: "Processing..."})
+            })
+            .done((resp) => {
+              let sign = Props.opt.sign[data.status];
+              Object.assign(resp.context, {
+                sign: { userkey: sign.userkey, mode: sign.mode },
+              });
+              this.apiServ.handleDone(resp, (resp) => {
+                let context = resp.context;
+              
+                //Audio บันทึกสำเร็จ
+                this.audioRecordSuccess.play();
+                
+              
+                //Diplay scanned-context
+                this.controlScannedSign.display(context);
+          
+                //UnDiplay scanned-context
+                this.controlScannedSign.refreshUnDisplay();
+                this.controlScannedSign.unDisplay();
+          
+                //Diplay success
+                this.controlSettedSignModeSuccess.display();
+          
+                //UnDiplay success
+                this.controlSettedSignMode.refreshUnDisplay();
+                this.controlSettedSignMode.unDisplay();
+              });
+            })
+            .always(() => {
+                if(!this.qr.preventQRScan){
+                  BlockUI.unload();
+                }
+            });
+
+          }
+      }
+
+      //Clock-time diplaying 
+      this.timeServ.clockDisp();
+
+
+      //Fullscreen checking 
+      if(this.#letCheckFullScreen) {
+        $(document).ready(function () {
+          self.checkFullscreen();
+          $(window).on("resize", function () {
+            self.checkFullscreen();
+          });
+        });
+      }
+
+      Props.displaySystemVersion(this.#CONFIG.SYSTEM_VERSION);
+      Props.displayLocation(this.apiServ.gethostName);
+    }
   }
 
  
@@ -361,6 +360,12 @@ class AppQRStation {
       ()=>{$("#nav-bottom-load-checkOnline").html("Chk-Onl..").show().fadeOut( 5000, "linear")}
     ).done((resp)=>{
       if(resp.status){
+         //GET STATION_NAME
+         this.#CONFIG.STATION_NAME = resp.context.stationName;
+
+         //GET STATION_ACTIVE
+         this.#CONFIG.STATION_ACTIVE = resp.context.stationActive;
+
         Props.displayCheckOnlineData(resp.context);
       }
     })
@@ -385,37 +390,30 @@ class AppQRStation {
     }
   }
 
-  //@ +AppQRStation.controlUpdateConfig
-  controlUpdateConfig() {
+  //@ +AppQRStation.controlGetUpdateConfig
+  controlGetUpdateConfig() {
     this.apiServ.configs.getSettingGui(
       ()=>{$("#nav-bottom-load-settingGui").html("Upd-Conf..").show().fadeOut( 5000, "linear")}
     ).done((resp)=>{
+        
+        //GET CHECK_ONLINE_PERIOD & conv to CHECK_ONLINE_PERIOD__MSEC (millisec)
+        this.#CONFIG.CHECK_ONLINE_PERIOD__MSEC = UTLServ.minuteToMillisec(Number(_.find(resp.context, ['name', 'CHECK_ONLINE_PERIOD']).value));
 
-          //GET CONFIG AND CUSTOM DATA
-          //CHECK_ONLINE_PERIOD
-          this.#CONFIG.CHECK_ONLINE_PERIOD__MSEC = UTLServ.minuteToMillisec(Number(_.find(resp.context, ['name', 'CHECK_ONLINE_PERIOD']).value));
+        //GET REFRESH_GUI_PERIOD
+        let REFRESH_GUI_PERIOD = _.find(resp.context, ['name', 'REFRESH_GUI_PERIOD']).value;
+        let refreshTime = REFRESH_GUI_PERIOD.split(":");
 
-          //REFRESH_GUI_PERIOD
-          let REFRESH_GUI_PERIOD = _.find(resp.context, ['name', 'REFRESH_GUI_PERIOD']).value;
-          let refreshTime = REFRESH_GUI_PERIOD.split(":");
+        $.extend(this.#CONFIG.REFRESH_GUI_PERIOD, {
+          HOUR: Number(refreshTime[0]), 
+          MINUTE: Number(refreshTime[1]), 
+          SECOND:  Number(refreshTime[2])
+        });
 
-          $.extend(this.#CONFIG.REFRESH_GUI_PERIOD, {
-            HOUR: Number(refreshTime[0]), 
-            MINUTE: Number(refreshTime[1]), 
-            SECOND:  Number(refreshTime[2])
-          });
-
-          //F14_DELAY_SECOND
-          this.#CONFIG.F14_DELAY_SECOND__MSEC = UTLServ.secondToMillisec(Number(_.find(resp.context, ['name', 'F14_DELAY_SECOND']).value));
-          
-          //SCAN_DELAY_SECOND
-          this.#CONFIG.SCAN_DELAY_SECOND__MSEC = UTLServ.secondToMillisec(Number(_.find(resp.context, ['name', 'SCAN_DELAY_SECOND']).value));
-
-          console.log({CHECK_ONLINE_PERIOD: this.#CONFIG.CHECK_ONLINE_PERIOD__MSEC,
-            REFRESH_GUI_PERIOD: this.#CONFIG.REFRESH_GUI_PERIOD,
-            F14_DELAY_SECOND: this.#CONFIG.F14_DELAY_SECOND__MSEC,
-            SCAN_DELAY_SECOND: this.#CONFIG.SCAN_DELAY_SECOND__MSEC
-          });
+        //GET F14_DELAY_SECOND & conv to F14_DELAY_SECOND__MSEC (millisec)
+        this.#CONFIG.F14_DELAY_SECOND__MSEC = UTLServ.secondToMillisec(Number(_.find(resp.context, ['name', 'F14_DELAY_SECOND']).value));
+        
+        //GET SCAN_DELAY_SECOND  & conv to SCAN_DELAY_SECOND__MSEC (millisec)
+        this.#CONFIG.SCAN_DELAY_SECOND__MSEC = UTLServ.secondToMillisec(Number(_.find(resp.context, ['name', 'SCAN_DELAY_SECOND']).value));
     })
   
   }
@@ -449,7 +447,7 @@ class AppQRStation {
       this.#timerUnDisplaySettedSignMode = setTimeout(() => {
         this.qr.signMode = Props.opt.sign.IN.mode;
         Props.unDisplaySettedSignMode();
-      }, UTLServ.secondToMillisec(this.#CONFIG.F14_DELAY_SECOND__MSEC));
+      }, this.#CONFIG.F14_DELAY_SECOND__MSEC);
     },
   };
 
@@ -457,17 +455,7 @@ class AppQRStation {
   controlSettedSignModeSuccess = {
     display: () => {
       Props.displaySettedSignModeSuccess();
-    },
-    refreshUnDisplay: () => {
-      if (this.#timerUnDisplaySettedSignMode) {
-        clearTimeout(this.#timerUnDisplaySettedSignMode);
-      }
-    },
-    unDisplay: () => {
-      this.#timerUnDisplaySettedSignMode = setTimeout(() => {
-        Props.unDisplaySettedSignModeSuccess();
-      }, UTLServ.secondToMillisec(this.#CONFIG.SCAN_DELAY_SECOND__MSEC));
-    },
+    }
   };
 
   //@ +AppQRStation.controlScannedSign
@@ -495,7 +483,7 @@ class AppQRStation {
     unDisplay: () => {
       this.#timerUnDisplayScannedSign = setTimeout(() => {
         Props.unDisplayScannedSign();
-      }, UTLServ.secondToMillisec(this.#CONFIG.SCAN_DELAY_SECOND__MSEC));
+      }, this.#CONFIG.SCAN_DELAY_SECOND__MSEC);
     },
   };
 }

@@ -103,3 +103,103 @@ body {
     border-color: transparent;
     box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
   }
+
+  /*Costom style app-qr-station (index)*/
+  .btn-scale {
+    width: 100%;
+    height: 100%;
+    font-size: 2.5rem;
+  }
+
+  .navbar-top-scale {
+    height: 160px;
+  }
+
+  .navbar-bottom-scale {
+    height: 40px;
+  }
+
+  .navbar-dark {
+    color: #fff;
+  }
+  
+  .font-sx {
+    font-size: 1.0rem;
+  }
+  .font-sxb {
+    font-size: 1.0rem;
+    font-weight: bold;
+  }
+
+  .font-sxl {
+    font-size: 1.3rem;
+  }
+  .font-sxlb {
+    font-size: 1.3rem;
+    font-weight: bold;
+  }
+
+  .font-sm {
+    font-size: 2rem;
+  }
+  .font-smb {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+
+  .font-sml {
+    font-size: 2.5rem;
+  }
+  .font-smlb {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+
+  .font-md {
+    font-size: 3rem;
+  }
+  .font-mdb {
+    font-size: 3rem;
+    font-weight: bold;
+  }
+
+  .font-mdl {
+    font-size: 3.7rem;
+  }
+  .font-mdlb {
+    font-size: 3.7rem;
+    font-weight: bold;
+  }
+
+  .font-lg {
+    font-size: 4.5rem;
+  }
+  .font-lgb {
+    font-size: 4.5rem;
+    font-weight: bold;
+  }
+
+  .font-lgl {
+    font-size: 5.5rem;
+  }
+  .font-lglb {
+    font-size: 5.5rem;
+    font-weight: bold;
+  }
+
+  li.nav-item >  h3, h4, h5 {
+    color: #FFF !important;
+  }
+
+  .section {
+   height: 100%;  
+  display: flex;
+  flex-direction: column;
+  /*justify-content: center;
+  align-items: center;*/
+}
+
+  .mxs-auto {
+    margin-top: auto;
+    margin-bottom: auto;
+  }

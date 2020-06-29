@@ -61,38 +61,31 @@ class BlockUI {
  * NRK, 02-06-2020
  */
 class HTTPServ {
-
-  constructor() {
-    this.audioScanFailQRExpire = new Audio(
-      "audio/qr-station-scan-fail-qr-expire.m4a"
-    );
-    this.audioScanFailDataWrong = new Audio(
-      "audio/qr-station-scan-fail-data-wrong.m4a"
-    );
-    this.audioScanFailQRWrongFormat = new Audio(
-      "audio/qr-station-scan-fail-qr-wrong-format.m4a"
-    );
-    this.audioError = new Audio("audio/qr-station-error.m4a");
+  httpSetup = {callbackError: ()=>{}};
+  constructor(httpSetup) {
+    if(httpSetup){
+     $.extend(this.httpSetup, httpSetup);
+    }
   }
-
   //@ HTTPServ +properties
   defaultSetting = {
     url: "",
     method: "GET",
     dataType: "json",
-    data: undefined,
+    data: {},
     async: true,
     beforeSend:  () => {},
     complete:  () => {},
     success: () => {},
-    error: (jqXHR, textStatus) =>{
+    error: (jqXHR, textStatus, errorThrown) => {
       $("#disp-status")
         .removeClass("alert-primary alert-sucess")
         .addClass("alert-danger")
         .show()
+        .empty()
         .html(
-          `<span class="text-danger">
-            <strong>HTTP Request error -msg- </strong> ${
+          `<span class="text-danger font-sm">
+            <strong>- HTTP Request error, Msg: </strong> ${
               jqXHR.message ? jqXHR.message : "Unknown"
             },
             <strong>Status:</strong> ${jqXHR.statusText},
@@ -100,86 +93,17 @@ class HTTPServ {
             <strong>Response:</strong> ${
               jqXHR.responseText ? jqXHR.responseText : "Unknown"
             }
-            </span>`
+            </span><br/>`
         );
+          this.httpSetup.callbackError();
+        
     },
     fail: (jqXHR, textStatus) => {},
   };
   //@ HTTPServ +properties
   setting = {};
 
-  //@ +HTTPServ.handleDone
-  handleDone(resp, callback, final) {
-    if (resp.status == false) {
-      let errorTitle = "Scan Fail";
-      let errorMessage = "";
-
-      let listScanError = {
-        "00": {
-          TH: "การประมวลผลการบันทึกข้อมูลผิดพลาด",
-          EN: "Error from Exception",
-        }, //[00] : Error from Exception
-        "01": { TH: "ไม่พบข้อมูล QR Code", EN: "Don't have QR data." }, //[01] Don't have QR data. : don't have qr data in GUI request body
-        "02": {
-          TH: "ไม่พบสถานะการลงเวลา",
-          EN: "Don't have QR scaning status.",
-        }, //[02] Don't have QR scaning status. : don't have scaning status data in GUI request body
-        "03": { TH: "QR Code ผิดรูปแบบ", EN: "QR Code Wrong!!! format." }, //[03] QR WRONG!!! format. : qr from GUI is wrong format
-        "04": {
-          TH: "คุณไม่มีสิทธิ์เข้าในงาน QR Station นี้",
-          EN: "Don't have this person data on QR Station.",
-        }, //04] Don't have this person data on QR Station. : check qr data with personal in this station, then not found this person
-        "05": { TH: "Qr Code หมดอายุ", EN: "QR Code Expire!!!" }, //[05] QR Expire!!! : qr time out
-      };
-
-      switch (resp.error) {
-        case "01":
-        case "02":
-        case "04":
-          this.audioScanFailDataWrong.play();
-          break;
-        case "03":
-          this.audioScanFailQRWrongFormat.play();
-          break;
-        case "05":
-          this.audioScanFailQRExpire.play();
-          break;
-        default:
-          this.audioError.play();
-          errorTitle = "Error Ocorred";
-      }
-
-      if (resp.error in listScanError) {
-        errorMessage = `${resp.context}`;
-      } else {
-        let listError = [];
-        if (resp.error) {
-          listError.push(`Error: ${resp.error}`);
-        }
-        if (resp.message) {
-          listError.push(`Message: ${resp.message}`);
-        }
-        listError.join(", ");
-        errorMessage = listError;
-      }
-      $("#disp-status")
-        .removeClass("alert-primary")
-        .addClass("alert-danger")
-        .show()
-        .html(
-          `<span class="text-danger"> <strong> ${errorTitle}: </strong> ${errorMessage}`
-        );
-    } else {
-      //Call callback that one is undefined
-      if (callback) {
-        callback(resp);
-      }
-    }
-    //Call final that one is undefined
-    if (final) {
-      final();
-    }
-  }
+  
 
   //@ +HTTPServ.ajax
   ajax(setting) {
@@ -224,8 +148,8 @@ class UTLServ {
     return second*1000;
   }
 
-  static  minuteToMillisec(second){
-    return second*60000;
+  static  minuteToMillisec(minute){
+    return minute*60000;
   }
   
   //@ +UTLServ.getTimeMan : View in fullscreen
@@ -333,7 +257,7 @@ class APIServ extends HTTPServ {
   #hostName = {
     app: { 
       prd: "flextime.station",
-      qas: "flextime-qas.station",
+      qas: "qas.flextime.station",
     },
     api: {
       prd: "api.flextime.station",
@@ -349,19 +273,24 @@ class APIServ extends HTTPServ {
   #apiHostname = "";
   
    //@ APIServ +properties
-  gethostName = {
-    api: "",
-    app: ""
-  }
+  gethostName = { }
 
-  constructor() {
-    super();
+  constructor(httpSetup) {
+    super(httpSetup);
+    
+    let data = null;
+
+    // try{
+    // var urlParams = new URLSearchParams(window.location.search);
+    //   data = urlParams.get('server');
+    // }catch(e){ }
+
     this.#locationHostname = window.location.hostname;
 
     switch (this.#locationHostname) {
       
       case this.#hostName.app.prd:
-        this.#apiHostname = `https://${this.#hostName.api.prd}`;
+        this.#apiHostname = `http://${this.#hostName.api.prd}`;
         break;
       case this.#hostName.app.qas:
         this.#apiHostname = `http://${this.#hostName.api.qas}`;
@@ -373,7 +302,20 @@ class APIServ extends HTTPServ {
     
     let locationHostname = this.#locationHostname?this.#locationHostname:"localhost";
     let apiHostname = this.#apiHostname;
-    Object.assign(this.gethostName, {api:  apiHostname, app: locationHostname});
+    Object.assign(this.gethostName, {hostnameApi:  apiHostname, hostnameApp: locationHostname});
+
+
+    this.audioScanFailQRExpire = new Audio(
+      "audio/qr-station-scan-fail-qr-expire.m4a"
+    );
+    this.audioScanFailDataWrong = new Audio(
+      "audio/qr-station-scan-fail-data-wrong.m4a"
+    );
+    this.audioScanFailQRWrongFormat = new Audio(
+      "audio/qr-station-scan-fail-qr-wrong-format.m4a"
+    );
+    this.audioError = new Audio("audio/qr-station-error.m4a");
+
   }
 
   //@ +APIServ.trancaction
@@ -391,26 +333,96 @@ class APIServ extends HTTPServ {
 
   //@ +APIServ.configs
   configs = {
-    getSettingGui: (beforeSend, always) => {
+    getSettingGui: (beforeSend, complete) => {
       return this.ajax({
         method: "GET",
         dataType: "json",
         async: false,
         url: `${this.#apiHostname}/configs/setting-gui`,
         beforeSend: beforeSend,
-        always: always
+        complete: complete
       });
     }
   }
 
   //@ +APIServ.checkOnline
-  checkOnline = (beforeSend, always) => {
+  checkOnline = (beforeSend, complete) => {
     return this.ajax({
       method: "GET",
       dataType: "json",
       url: `${this.#apiHostname}/checkOnline`,
       beforeSend: beforeSend,
-      always: always
+      complete: complete
     });
   };
+
+  //@ +HTTPServ.handleDone
+  handleDone(resp, callback) {
+    if (resp.status == false) {
+      let errorTitle = "Scan Fail";
+      let errorMessage = "";
+
+      let listScanError = {
+        "00": {
+          TH: "การประมวลผลการบันทึกข้อมูลผิดพลาด",
+          EN: "Error from Exception",
+        }, //[00] : Error from Exception
+        "01": { TH: "ไม่พบข้อมูล QR Code", EN: "Don't have QR data." }, //[01] Don't have QR data. : don't have qr data in GUI request body
+        "02": {
+          TH: "ไม่พบสถานะการลงเวลา",
+          EN: "Don't have QR scaning status.",
+        }, //[02] Don't have QR scaning status. : don't have scaning status data in GUI request body
+        "03": { TH: "QR Code ผิดรูปแบบ", EN: "QR Code Wrong!!! format." }, //[03] QR WRONG!!! format. : qr from GUI is wrong format
+        "04": {
+          TH: "คุณไม่มีสิทธิ์เข้าในงาน QR Station นี้",
+          EN: "Don't have this person data on QR Station.",
+        }, //04] Don't have this person data on QR Station. : check qr data with personal in this station, then not found this person
+        "05": { TH: "Qr Code หมดอายุ", EN: "QR Code Expire!!!" }, //[05] QR Expire!!! : qr time out
+      };
+
+      switch (resp.error) {
+        case "01":
+        case "02":
+        case "04":
+          this.audioScanFailDataWrong.play();
+          break;
+        case "03":
+          this.audioScanFailQRWrongFormat.play();
+          break;
+        case "05":
+          this.audioScanFailQRExpire.play();
+          break;
+        default:
+          this.audioError.play();
+          errorTitle = "Error Ocorred";
+      }
+
+      if (resp.error in listScanError) {
+        errorMessage = `${resp.context}`;
+      } else {
+        let listError = [];
+        if (resp.error) {
+          listError.push(`Error: ${resp.error}`);
+        }
+        if (resp.message) {
+          listError.push(`Message: ${resp.message}`);
+        }
+        listError.join(", ");
+        errorMessage = listError;
+      }
+      $("#disp-status")
+        .removeClass("alert-primary")
+        .addClass("alert-danger")
+        .show()
+        .html(
+          `<span class="text-danger font-sml"> <strong> ${errorTitle}: </strong> ${errorMessage}`
+        );
+        this.httpSetup.callbackError();
+    } else {
+      //Call callback that one is undefined
+      if (callback) {
+        callback(resp);
+      }
+    }
+  }
 }

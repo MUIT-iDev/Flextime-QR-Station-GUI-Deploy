@@ -11,8 +11,15 @@
     <meta name="author" content="" />
     <!-- Bootstrap CSS -->
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>   
-    <link rel="stylesheet" href="css/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/layout.css" />
+    <script type="text/javascript">
+    "use strict";
+    (function () {
+      var d = new Date();
+      var vts = d.getTime();
+      document.write("<link rel='stylesheet' href='css/bootstrap.min.css?v="+ vts +"' />");
+      document.write("<link rel='stylesheet' href='css/layout.css?v="+ vts +"' />");
+      })();
+    </script>
     <script src="script/jquery.min.js"></script>
     <script src="script/popper.min.js"></script>
     <script src="script/bootstrap.min.js"></script>
@@ -23,90 +30,25 @@
     
     <title>Flexible Time - QR Station</title>
   </head>
-  <style>
-    .btn-scale {
-      width: 100%;
-      height: 100%;
-      font-size: 1.5rem;
-    }
-
-    .navbar-top-scale {
-      height: 160px;
-    }
-
-    .navbar-bottom-scale {
-      height: 40px;
-    }
-
-    .navbar-dark {
-      color: #fff;
-    }
-    
-    .font-sx {
-      font-size: 1.8rem;
-    }
-    .font-sxb {
-      font-size: 1.8rem;
-      font-weight: bold;
-    }
-
-    .font-sm {
-      font-size: 2.5rem;
-    }
-    .font-smb {
-      font-size: 2.5rem;
-      font-weight: bold;
-    }
-
-    .font-md {
-      font-size: 3.5rem;
-    }
-    .font-mdb {
-      font-size: 3.5rem;
-      font-weight: bold;
-    }
-
-    .font-lg {
-      font-size: 5rem;
-    }
-    .font-lgb {
-      font-size: 5rem;
-      font-weight: bold;
-    }
-
-    li.nav-item >  h3, h4, h5 {
-      color: #FFF !important;
-    }
-
-    .section {
-     height: 100%;  
-    display: flex;
-    flex-direction: column;
-    /*justify-content: center;
-    align-items: center;*/
-  }
-
-    .mxs-auto {
-      margin-top: auto;
-      margin-bottom: auto;
-    }
-  </style>
-  <body ondragover="window.event.returnValue=false;">
-    <div class="container-fluid">
+  <body ondragover="window.event.returnValue=false;" id="station">
+    <div class="container-fluid" id="station-load">
+      <div class="alert alert-info py-2 my-2 text-center font-lg" role="alert">STATION - LOADING ...</div>
+    </div>
+    <div class="container-fluid" id="station-active" style="display: none;">
       <div class="row">
         <nav class="navbar navbar-top-scale navbar-dark sticky-top bg-dark p-0 col-md-8 col-lg-8" >
             <div class="col-md-7 col-lg-7 mxs-auto text-left">
-              <span class="font-sm" id="date-sys">-</span>
+              <span class="font-mdl" id="date-sys">-</span>
             </div>
             <div class="col-md-5 col-lg-5 font-md mxs-auto text-right">
-              <span class="font-md" id="time-sys">-</span>
+              <span class="font-lgl" id="time-sys">-</span>
             </div>
         </nav>
       </div>
       <div class="row">
         <nav class="col-md-4 col-lg-4 d-none d-md-block bg-dark sidebar collapse">
           <div class="sidebar-sticky">
-            <div class="text-right font-sx" style="height: 120px; color:#FFF;">Flextime QR Code</div>
+            <div class="text-right font-sml" style="height: 120px; color:#FFF;">Flextime QR Code</div>
             <div class="d-flex flex-column h-75">
               <div class="m-2 flex-grow-1"><button type="button" class="btn btn-primary btn-scale" set="sign-mode"  mode="clock in" userkey="F1">N/A</button></div>
               <div class="m-2 flex-grow-1"> <button type="button" class="btn btn-secondary btn-scale" set="sign-mode" mode="clock out" userkey="F2">N/A</button></div>
@@ -117,7 +59,7 @@
         </nav>
         <div id="disp-sign-test"></div>
         <main role="main" class="col-md-7 col-lg-8 mr-auto px-2 py-2">
-          <div class="alert alert-primary py-2 font-sm" role="alert" id="disp-status">
+          <div class="alert alert-primary py-2" role="alert" id="disp-status">
             <!-- A simple primary alert—check it out! -->
           </div>
           <div class="py-4 section">
@@ -127,25 +69,29 @@
           </div>
         </main>
       </div>
+      <!--nav bottom-->
+      <nav class="navbar navbar-bottom-scale fixed-bottom navbar-expand-sm navbar-dark bg-dark navbar-footing text-xs">
+          <div class="col-sm-8 col-md-8 col-lg-8 mxs-auto font-sxl text-left">
+            <span id="nav-bottom-stationName"></span>&nbsp;
+            <span id="nav-bottom-onlineStatus" class="badge badge-pill badge-danger">offline</span>&nbsp;
+            <span id="nav-bottom-peopleOnStation"></span>&nbsp;
+            <span id="nav-bottom-transactionRecord"></span>&nbsp; 
+            <span id="nav-bottom-limitRecord"></span>&nbsp;
+            <span id="nav-bottom-sysVersion" ></span>&nbsp;
+            <span id="nav-bottom-sysLocation" style="color: #343A40;"></span>&nbsp;
+          </div>
+          <div class="col-sm-2 col-md-2 col-lg-2 mxs-auto text-right">
+          <span id="nav-bottom-load-settingGui"></span>  
+          <span id="nav-bottom-load-checkOnline"></span>  
+          </div>
+          <div class="col-sm-2 col-md-2 col-lg-2 mxs-auto font-sx text-right">
+          <span id="nav-bottom-title">Powered by MUIT.</span>  
+          </div>
+    </nav>
     </div>
-    <!--nav bottom-->
-    <nav class="navbar navbar-bottom-scale fixed-bottom navbar-expand-sm navbar-dark bg-dark navbar-footing text-xs">
-        <div class="col-sm-8 col-md-8 col-lg-8 mxs-auto text-sm text-left">
-          <span id="nav-bottom-stationName"></span>&nbsp;
-          <span id="nav-bottom-onlineStatus" class="badge badge-pill badge-success">online</span>&nbsp;
-          <span id="nav-bottom-peopleOnStation"></span>&nbsp;
-          <span id="nav-bottom-transactionRecord"></span>&nbsp; 
-          <span id="nav-bottom-limitRecord"></span>&nbsp;
-          <span id="nav-bottom-sysLocation" style="color: #343A40;"></span>&nbsp;
-        </div>
-        <div class="col-sm-2 col-md-2 col-lg-2 mxs-auto text-right">
-         <span id="nav-bottom-load-settingGui"></span>  
-         <span id="nav-bottom-load-checkOnline"></span>  
-        </div>
-        <div class="col-sm-2 col-md-2 col-lg-2 mxs-auto text-right">
-         <span id="nav-bottom-title">Powered by MUIT.</span>  
-        </div>
-   </nav>
+    <div class="container-fluid" id="station-in-active" style="display: none;">
+      <div class="alert alert-danger py-2 my-2 text-center font-lg" role="alert">STATION - INACTIVE</div>
+    </div>
   <script type="text/javascript">
     "use strict";
     (function () {
