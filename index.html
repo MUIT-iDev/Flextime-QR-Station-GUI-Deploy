@@ -38,17 +38,17 @@
       <div class="row">
         <nav class="navbar navbar-top-scale navbar-dark sticky-top bg-dark p-0 col-md-8 col-lg-8" >
             <div class="col-md-7 col-lg-7 mxs-auto text-left">
-              <span class="font-mdl" id="date-sys">-</span>
+              <span class="font-md" id="date-sys">-</span>
             </div>
             <div class="col-md-5 col-lg-5 font-md mxs-auto text-right">
-              <span class="font-lgl" id="time-sys">-</span>
+              <span class="font-lg" id="time-sys">-</span>
             </div>
         </nav>
       </div>
       <div class="row">
         <nav class="col-md-4 col-lg-4 d-none d-md-block bg-dark sidebar collapse">
           <div class="sidebar-sticky">
-            <div class="text-right font-sml" style="height: 120px; color:#FFF;">Flextime QR Code</div>
+            <div class="text-right font-sm" style="height: 120px; color:#FFF;">Flextime QR Code</div>
             <div class="d-flex flex-column h-75">
               <div class="m-2 flex-grow-1"><button type="button" class="btn btn-primary btn-scale" set="sign-mode"  mode="clock in" userkey="F1">N/A</button></div>
               <div class="m-2 flex-grow-1"> <button type="button" class="btn btn-secondary btn-scale" set="sign-mode" mode="clock out" userkey="F2">N/A</button></div>
@@ -70,21 +70,25 @@
         </main>
       </div>
       <!--nav bottom-->
-      <nav class="navbar navbar-bottom-scale fixed-bottom navbar-expand-sm navbar-dark bg-dark navbar-footing text-xs">
-          <div class="col-sm-8 col-md-8 col-lg-8 mxs-auto font-sxl text-left">
-            <span id="nav-bottom-stationName"></span>&nbsp;
-            <span id="nav-bottom-onlineStatus" class="badge badge-pill badge-danger">offline</span>&nbsp;
-            <span id="nav-bottom-peopleOnStation"></span>&nbsp;
-            <span id="nav-bottom-transactionRecord"></span>&nbsp; 
-            <span id="nav-bottom-limitRecord"></span>&nbsp;
-            <span id="nav-bottom-sysVersion" ></span>&nbsp;
-            <span id="nav-bottom-sysLocation" style="color: #343A40;"></span>&nbsp;
+      <nav class="navbar navbar-bottom-scale fixed-bottom navbar-expand-sm navbar-dark bg-dark navbar-footing p-1 m-0">
+          <div class="col-sm-8 col-md-8 col-lg-8 mxs-auto pl-1 pr-1 px-0  text-left">
+            <p class="p-0 m-0 font-sx">
+              <span id="nav-bottom-stationName"></span>
+            </p>
+            <p class="p-0  m-0 font-sxx">
+              <span id="nav-bottom-onlineStatus" class="badge badge-pill badge-danger">offline</span>
+              <span id="nav-bottom-peopleOnStation"></span>
+              <span id="nav-bottom-transactionRecord"></span>
+              <span id="nav-bottom-limitRecord"></span>
+              <span id="nav-bottom-sysVersion" style="display: none; color: #343A40;"></span>
+              <span id="nav-bottom-sysLocation" style="display: none; color: #343A40;"></span>
+            </p>
           </div>
-          <div class="col-sm-2 col-md-2 col-lg-2 mxs-auto text-right">
+          <div class="col-sm-2 col-md-2 col-lg-2 mxs-auto font-sxx text-right">
           <span id="nav-bottom-load-settingGui"></span>  
           <span id="nav-bottom-load-checkOnline"></span>  
           </div>
-          <div class="col-sm-2 col-md-2 col-lg-2 mxs-auto font-sx text-right">
+          <div class="col-sm-2 col-md-2 col-lg-2 mxs-auto font-sxx text-right">
           <span id="nav-bottom-title">Powered by MUIT.</span>  
           </div>
     </nav>

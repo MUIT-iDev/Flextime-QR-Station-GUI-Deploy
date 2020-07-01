@@ -84,7 +84,7 @@ class HTTPServ {
         .show()
         .empty()
         .html(
-          `<span class="text-danger font-sm">
+          `<span class="text-danger font-sxl">
             <strong>- HTTP Request error, Msg: </strong> ${
               jqXHR.message ? jqXHR.message : "Unknown"
             },
@@ -199,7 +199,7 @@ class TimeServ {
   };
 
   day = {
-    TH: ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."],
+    TH: ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์"],
     EN: [
       "Sunday",
       "Monday",
@@ -415,7 +415,7 @@ class APIServ extends HTTPServ {
         .addClass("alert-danger")
         .show()
         .html(
-          `<span class="text-danger font-sml"> <strong> ${errorTitle}: </strong> ${errorMessage}`
+          `<span class="text-danger font-sm"> <strong> ${errorTitle}: </strong> ${errorMessage}`
         );
         this.httpSetup.callbackError();
     } else {

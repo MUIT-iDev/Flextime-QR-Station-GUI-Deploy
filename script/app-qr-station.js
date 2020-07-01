@@ -35,8 +35,29 @@ class Props {
     },
   };
 
+  static text  = {
+    scan: {
+      please: "กรุณา Scan QR Code เพื่อลงเวลา",
+    },
+    save: {
+      success: "บันทึกสำเร็จ (Save Successfully)"
+    }
+  }
+
   static delayUnDisplaySettedSignMode = 5000;
   static delayUnDisplayScannedSign = 5000;
+
+  static dispayStationActive(){
+    $("#station-load").remove();
+    $("#station-active").show();
+    $("#station-in-active").hide();
+  }
+
+  static dispayStationInActive(){
+    $("#station-load").remove();
+    $("#station-in-active").show();
+    $("#station-active").hide();
+  }
 
 
   //@ +Props.displaySettedSignMode: แสดงผลการ Set Sign Mode
@@ -50,7 +71,7 @@ class Props {
       .removeClass("alert-danger alert-success")
       .addClass("alert-primary")
       .show().html(`
-      <span class="font-mdb">Set - ${sign.userkey} (${sign.mode.toUpperCase()})</span>
+      <span class="font-smb">Set - ${sign.userkey} (${sign.mode.toUpperCase()})</span>
     `);
   }
 
@@ -67,7 +88,7 @@ class Props {
       .removeClass("alert-danger alert-primary")
       .addClass("alert-success")
       .show().html(`
-          <span class="font-mdlb">บันทึกสำเร็จ (Save Successfully)</span>
+          <span class="font-smlb">${this.text.save.success}</span>
     `);
   }
 
@@ -79,16 +100,16 @@ class Props {
   //@ +Props.displayScannedSign: แสดงผลการสแกน QR Code เพื่อลงเวลา
   static displayScannedSign(data) {
     let signMode = data.sign.mode.toUpperCase();
-    $(`#${this.opt.disp.sign}`).html(`<span class="font-mdlb">Time     : </span> <span class="font-mdlb text-primary">${data.regisTime}</span><br/>
-    <span class="font-mdlb">Name  : </span> <span class="font-mdl text-primary">${data.fullname} </span><br/>
-    <span class="font-mdb">Card Id   : </span> <span class="font-md text-primary">${ data.cardId} </span><br/>
-    <span class="font-mdb">Sign Mode : </span> <span class="font-md text-primary">${data.sign.userkey ? data.sign.userkey.toUpperCase() +" (" + signMode +")": signMode} </span> <br/>
+    $(`#${this.opt.disp.sign}`).html(`<span class="font-smlb">Time     : </span> <span class="font-smlb text-primary">${data.regisTime}</span><br/>
+    <span class="font-mdlb">Name  : </span> <span class="font-sml text-primary">${data.fullname} </span><br/>
+    <span class="font-smb">Card Id   : </span> <span class="font-sm text-primary">${ data.cardId} </span><br/>
+    <span class="font-smb">Sign Mode : </span> <span class="font-sm text-primary">${data.sign.userkey ? data.sign.userkey.toUpperCase() +" (" + signMode +")": signMode} </span> <br/>
     `);
   }
 
   //@ +Props.displayScannedSign: แสดงผลการสิ้นสุดการสแกน QR Code เพื่อลงเวลา
   static unDisplayScannedSign() {
-    $(`#${this.opt.disp.sign}`).html(`<p class="font-md">กรุณา Scan QR Code เพื่อลงเวลา</p>`);
+    $(`#${this.opt.disp.sign}`).html(`<p class="font-sml">${this.text.scan.please}</p>`);
   }
 
   //@ +Props.displayCheckOnlineData: แสดงผล CheckOnline
@@ -100,19 +121,19 @@ class Props {
     let onlineClass = (data.onlineStatus)?'badge badge-pill badge-success':'badge badge-pill badge-danger';
     $("#nav-bottom-onlineStatus").html(onlineStatus).removeClass().addClass(onlineClass);
 
-    $("#nav-bottom-peopleOnStation").html(`| <strong>System info</strong> - User: ${data.peopleOnStation}`);
+    $("#nav-bottom-peopleOnStation").html(`| <strong>Sys-info</strong> - User: ${data.peopleOnStation}`);
 
-    $("#nav-bottom-transactionRecord").html(`, Trans: ${data.transactionRecord}`);
+    $("#nav-bottom-transactionRecord").html(`,Trans: ${data.transactionRecord}`);
 
-    $("#nav-bottom-limitRecord").html(`, Limit Trans: ${data.limitRecord}`);
+    $("#nav-bottom-limitRecord").html(`, LimitTrans: ${data.limitRecord}`);
   }
 
   static displaySystemVersion(systemVersion){
-    $("#nav-bottom-sysVersion").html(`| <strong>Version</strong>: ${systemVersion}`);
+    $("#nav-bottom-sysVersion").html(`v.${systemVersion}`);
   }
 
   static displayLocation(data){
-    $("#nav-bottom-sysLocation").html(`| <strong>Hostname</strong> - ${JSON.stringify(data)}`);
+    $("#nav-bottom-sysLocation").html(`${JSON.stringify(data)}`);
   }
 }
 
@@ -129,9 +150,11 @@ class QR {
   #preventQRScanCount = 0;
   
   //@ QR +properties
+  stationActive = true;
   preventQRScan = false;
   signMode = Props.opt.sign.IN.mode;
   actionScanDo = undefined; // ({QR.scanned, QR.status}) => { //actionScanDo }
+
   constructor() {
     this.audioQRStationNotReady = new Audio("audio/qr-station-not-ready.m4a");
     this.init();
@@ -143,42 +166,50 @@ class QR {
     //###################################//
     //Bind QR-Scanner key each-text-of-code to #scanned and request API-transaction(in setTimeByQRCode function) after end of text-of-code.
     $(document).on("keypress", function (e) {
-      if (!self.preventQRScan) {
-        if (self.#scanned == "") {
-          BlockUI.load({ message: "<h4>Scanning</h4>" });
-        }
-        self.#scanned += e.key;
-        //อ่านโค้ด
-
-        //timerScanned
-        if (self.#timerScanned) {
-          clearTimeout(self.#timerScanned);
-        }
-
-        //ถ้า QR Scanned จบ (ไม่มีการ keypress เพิ่ม นั่นคือไม่มีการ clearTimeout ภายใน 500 mls)  ให้เรียก setTimeByQRCode
-        self.#timerScanned = setTimeout(() => {
-          if (self.actionScanDo) {
-            self.actionScanDo({
-                qr: Base64.encode(self.#scanned), // from script/base64.js
-                status: self.signMode,
-            });
+      if(self.stationActive){
+        if (!self.preventQRScan) {
+          if (self.#scanned == "") {
+            BlockUI.load({ message: "<h4>Scanning</h4>" });
           }
-          //Clear QR props
-          self.#scanned = "";
-          self.signMode = self.#defaultSignMode;
-        }, 500);
-      } else {
-        if(self.#preventQRScanCount==0){
-          self.audioQRStationNotReady.play();
-          self.#preventQRScanCount++;
-          setTimeout(()=>{self.#preventQRScanCount=0}, 2500);
-        }else{
-          return;
+          self.#scanned += e.key;
+          //อ่านโค้ด
+
+          //timerScanned
+          if (self.#timerScanned) {
+            clearTimeout(self.#timerScanned);
+          }
+
+          //ถ้า QR Scanned จบ (ไม่มีการ keypress เพิ่ม นั่นคือไม่มีการ clearTimeout ภายใน 500 mls)  ให้เรียก setTimeByQRCode
+          self.#timerScanned = setTimeout(() => {
+            if (self.actionScanDo) {
+              self.actionScanDo({
+                  qr: Base64.encode(self.#scanned), // from script/base64.js
+                  status: self.signMode,
+              });
+            }
+            //Clear QR props
+            self.#scanned = "";
+            self.signMode = self.#defaultSignMode;
+          }, 500);
+        } else {
+          self.audioStationNotReadyOnKeypress();
         }
+      }else{
+        self.audioStationNotReadyOnKeypress();
       }
       e.preventDefault();
     });
     //###################################//
+  }
+
+  audioStationNotReadyOnKeypress(){
+    if(this.#preventQRScanCount==0){
+      this.audioQRStationNotReady.play();
+      this.#preventQRScanCount++;
+      setTimeout(()=>{this.#preventQRScanCount=0}, 2500);
+    }else{
+      return;
+    }
   }
 }
 
@@ -202,7 +233,7 @@ class AppQRStation {
     SCAN_DELAY_SECOND__MSEC: 1000*7,
     STATION_ACTIVE: true, /**User ser destroy or active station */
     STATION_NAME : "Untitle",
-    SYSTEM_VERSION : "202006291400"
+    SYSTEM_VERSION : "202006301630"
   }
 
   #timerUnDisplayScannedSign = null;
@@ -260,96 +291,86 @@ class AppQRStation {
     }, 
     this.#CONFIG.CHECK_ONLINE_PERIOD__MSEC)  // Repeat every 60000 milliseconds (1 minute) * 5 (5 minute)
 
-    if(!this.#CONFIG.STATION_ACTIVE) {
-      $("#station-load").remove();
-      $("#station-in-active").show();
-      $("#station-active").hide();
-     
-    }else {
 
-      this.qr = new QR();
-      this.timeServ = new TimeServ();
-      $("#station-load").remove();
-      $("#station-active").show();
-      $("#station-in-active").hide();
+    this.qr = new QR();
+    this.timeServ = new TimeServ();
+    Props.dispayStationActive()
 
-      Props.unDisplayScannedSign();
-      Props.unDisplaySettedSignMode();
+    Props.unDisplayScannedSign();
+    Props.unDisplaySettedSignMode();
 
-      //Bind click to signMode button
-      $(`button[${Props.prop.set}="${Props.opt.signMode}"]`).each(function () {
-        $(this).text(
-          `${$(this).attr(Props.prop.userkey)} (${$(this).attr(Props.prop.mode).toUpperCase()})`
-        );
-      });
-      $(`button[${Props.prop.set}="${Props.opt.signMode}"]`).on(
-        "click",
-        function () {
-          self.controlSetSignMode(this);
-        }
+    //Bind click to signMode button
+    $(`button[${Props.prop.set}="${Props.opt.signMode}"]`).each(function () {
+      $(this).text(
+        `${$(this).attr(Props.prop.userkey)} (${$(this).attr(Props.prop.mode).toUpperCase()})`
       );
+    });
+    $(`button[${Props.prop.set}="${Props.opt.signMode}"]`).on("click", function () {
+        self.controlSetSignMode(this);
+      }
+    );
 
-      //QR.actionScanDo ({QR.scanned, QR.status})
-      this.qr.actionScanDo = (data) => {
-        if(!this.qr.preventQRScan){
-            this.apiServ.transaction.setData(data,  (jqXHR ) => {
-                Props.unDisplayScannedSign();
-                Props.unDisplaySettedSignMode();
-                BlockUI.load({message: "Processing..."})
-            })
-            .done((resp) => {
-              let sign = Props.opt.sign[data.status];
-              Object.assign(resp.context, {
-                sign: { userkey: sign.userkey, mode: sign.mode },
-              });
-              this.apiServ.handleDone(resp, (resp) => {
-                let context = resp.context;
-              
-                //Audio บันทึกสำเร็จ
-                this.audioRecordSuccess.play();
-                
-              
-                //Diplay scanned-context
-                this.controlScannedSign.display(context);
-          
-                //UnDiplay scanned-context
-                this.controlScannedSign.refreshUnDisplay();
-                this.controlScannedSign.unDisplay();
-          
-                //Diplay success
-                this.controlSettedSignModeSuccess.display();
-          
-                //UnDiplay success
-                this.controlSettedSignMode.refreshUnDisplay();
-                this.controlSettedSignMode.unDisplay();
-              });
-            })
-            .always(() => {
-                if(!this.qr.preventQRScan){
-                  BlockUI.unload();
-                }
+    //QR.actionScanDo ({QR.scanned, QR.status})
+    this.qr.actionScanDo = (data) => {
+      if(!this.qr.preventQRScan){
+          this.apiServ.transaction.setData(data,  (jqXHR ) => {
+              Props.unDisplayScannedSign();
+              Props.unDisplaySettedSignMode();
+              BlockUI.load({message: "Processing..."})
+          })
+          .done((resp) => {
+            let sign = Props.opt.sign[data.status];
+            Object.assign(resp.context, {
+              sign: { userkey: sign.userkey, mode: sign.mode },
             });
-
-          }
-      }
-
-      //Clock-time diplaying 
-      this.timeServ.clockDisp();
-
-
-      //Fullscreen checking 
-      if(this.#letCheckFullScreen) {
-        $(document).ready(function () {
-          self.checkFullscreen();
-          $(window).on("resize", function () {
-            self.checkFullscreen();
+            this.apiServ.handleDone(resp, (resp) => {
+              let context = resp.context;
+            
+              //Audio บันทึกสำเร็จ
+              this.audioRecordSuccess.play();
+              
+            
+              //Diplay scanned-context
+              this.controlScannedSign.display(context);
+        
+              //UnDiplay scanned-context
+              this.controlScannedSign.refreshUnDisplay();
+              this.controlScannedSign.unDisplay();
+        
+              //Diplay success
+              this.controlSettedSignModeSuccess.display();
+        
+              //UnDiplay success
+              this.controlSettedSignMode.refreshUnDisplay();
+              this.controlSettedSignMode.unDisplay();
+            });
+          })
+          .always(() => {
+              if(!this.qr.preventQRScan){
+                BlockUI.unload();
+              }
           });
-        });
-      }
 
-      Props.displaySystemVersion(this.#CONFIG.SYSTEM_VERSION);
-      Props.displayLocation(this.apiServ.gethostName);
+        }
     }
+
+    //Clock-time diplaying 
+    this.timeServ.clockDisp();
+
+
+    //Fullscreen checking 
+    if(this.#letCheckFullScreen) {
+      $(document).ready(function () {
+        self.checkFullscreen();
+        $(window).on("resize", function () {
+          self.checkFullscreen();
+        });
+      });
+    }
+
+    Props.displaySystemVersion(this.#CONFIG.SYSTEM_VERSION);
+    Props.displayLocation(this.apiServ.gethostName);
+
   }
 
  
@@ -365,6 +386,14 @@ class AppQRStation {
 
          //GET STATION_ACTIVE
          this.#CONFIG.STATION_ACTIVE = resp.context.stationActive;
+
+         if(!this.#CONFIG.STATION_ACTIVE){
+           Props.dispayStationInActive();
+           this.qr.stationActive = false;
+         }else{
+          Props.dispayStationActive();
+          this.qr.stationActive = true;
+         }
 
         Props.displayCheckOnlineData(resp.context);
       }

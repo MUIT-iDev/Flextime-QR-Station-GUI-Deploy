@@ -108,7 +108,7 @@ body {
   .btn-scale {
     width: 100%;
     height: 100%;
-    font-size: 2.5rem;
+    font-size: 1.6rem;
   }
 
   .navbar-top-scale {
@@ -116,13 +116,19 @@ body {
   }
 
   .navbar-bottom-scale {
-    height: 40px;
+    height: 50px;
   }
 
   .navbar-dark {
     color: #fff;
   }
-  
+  .font-sxx {
+    font-size: 0.7rem;
+  }
+  .font-sxxb {
+    font-size: 0.7rem;
+    font-weight: bold;
+  }
   .font-sx {
     font-size: 1.0rem;
   }
