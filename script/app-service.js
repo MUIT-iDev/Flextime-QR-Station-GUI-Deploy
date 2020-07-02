@@ -47,6 +47,8 @@ class BlockUI {
       onUnblock: this.setting.onUnblock,
       ignoreIfBlocked: this.setting.ignoreIfBlocked,
     });
+
+    $('.blockUI.blockMsg').center();
   }
 
   //@ +BlockUI.unload
@@ -194,8 +196,15 @@ class TimeServ {
   //@ TimeServ +properties
   setting = {
     locales: "en-GB",
-    timeId: "time-sys",
-    dateId: "date-sys",
+    timeId: {
+      hour: "hour-sys",
+      minute: "minute-sys",
+      second: "second-sys"
+    },
+    dateId : {
+      day: "day-sys",
+      date: "date-sys",
+    }
   };
 
   day = {
@@ -220,8 +229,6 @@ class TimeServ {
 
   //@ +TimeServ.currentTime
   currentTime() {
-    let timeDisp = $(`#${this.setting.timeId}`);
-    let dateDisp = $(`#${this.setting.dateId}`);
     let d = new Date();
     let n = d.getDay();
     let dateString = d.toLocaleString(this.setting.locales);
@@ -229,11 +236,14 @@ class TimeServ {
     //Custom code
     let formattedString = dateString.replace(", ", " ");
     let dateList = formattedString.split(" ");
-    let dateSys = `${this.day.TH[n]} [${this.day.ENS[n]}] ${dateList[0]}`;
-    let timeSys = dateList[1];
-
-    dateDisp.html(dateSys);
-    timeDisp.html(timeSys);
+    let daySys = `${this.day.TH[n]} [${this.day.ENS[n]}]`;
+    let dateSys = dateList[0];
+    let timeSys = dateList[1].split(":");
+    $(`#${this.setting.dateId.day}`).html(daySys);
+    $(`#${this.setting.dateId.date}`).html(dateSys);
+    $(`#${this.setting.timeId.hour}`).html(timeSys[0]);
+    $(`#${this.setting.timeId.minute}`).html(timeSys[1]);
+    $(`#${this.setting.timeId.second}`).html(timeSys[2]);
   }
 
   //@ +TimeServ.clockDisp

@@ -106,6 +106,14 @@
                     remove(this, opts);
                 });
             };
+            
+            //https://forum.jquery.com/topic/blockui-centering-the-dialog-window
+            $.fn.center = function () {
+                this.css("position","absolute");
+                this.css("top", ( $(window).height() - this.height() ) / 2+$(window).scrollTop() + "px");
+                this.css("left", ( $(window).width() - this.width() ) / 2+$(window).scrollLeft() + "px");
+                return this;
+            }
     
             $.blockUI.version = 2.70; // 2nd generation blocking at no extra cost!
     

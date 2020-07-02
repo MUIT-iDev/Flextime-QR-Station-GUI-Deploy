@@ -100,8 +100,8 @@ class Props {
   //@ +Props.displayScannedSign: แสดงผลการสแกน QR Code เพื่อลงเวลา
   static displayScannedSign(data) {
     let signMode = data.sign.mode.toUpperCase();
-    $(`#${this.opt.disp.sign}`).html(`<span class="font-smlb">Time     : </span> <span class="font-smlb text-primary">${data.regisTime}</span><br/>
-    <span class="font-mdlb">Name  : </span> <span class="font-sml text-primary">${data.fullname} </span><br/>
+    $(`#${this.opt.disp.sign}`).html(`<span class="font-smb">Time     : </span> <span class="font-smlb text-primary">${data.regisTime}</span><br/>
+    <span class="font-smb">Name  : </span> <span class="font-sml text-primary">${data.fullname} </span><br/>
     <span class="font-smb">Card Id   : </span> <span class="font-sm text-primary">${ data.cardId} </span><br/>
     <span class="font-smb">Sign Mode : </span> <span class="font-sm text-primary">${data.sign.userkey ? data.sign.userkey.toUpperCase() +" (" + signMode +")": signMode} </span> <br/>
     `);
@@ -170,6 +170,7 @@ class QR {
         if (!self.preventQRScan) {
           if (self.#scanned == "") {
             BlockUI.load({ message: "<h4>Scanning</h4>" });
+
           }
           self.#scanned += e.key;
           //อ่านโค้ด
@@ -233,7 +234,7 @@ class AppQRStation {
     SCAN_DELAY_SECOND__MSEC: 1000*7,
     STATION_ACTIVE: true, /**User ser destroy or active station */
     STATION_NAME : "Untitle",
-    SYSTEM_VERSION : "202006301630"
+    SYSTEM_VERSION : "202007021100"
   }
 
   #timerUnDisplayScannedSign = null;
@@ -289,7 +290,7 @@ class AppQRStation {
     window.setInterval(() => {
       this.checkOnline()
     }, 
-    this.#CONFIG.CHECK_ONLINE_PERIOD__MSEC)  // Repeat every 60000 milliseconds (1 minute) * 5 (5 minute)
+    this.#CONFIG.CHECK_ONLINE_PERIOD__MSEC)  // Repeat every 60000 milliseconds (1 minute) * 5 (= 5 minute)
 
 
     this.qr = new QR();

@@ -31,47 +31,51 @@
     <title>Flexible Time - QR Station</title>
   </head>
   <body ondragover="window.event.returnValue=false;" id="station">
-    <div class="container-fluid" id="station-load">
-      <div class="alert alert-info py-2 my-2 text-center font-lg" role="alert">STATION - LOADING ...</div>
+    <div class="container-fluid h-100" id="station-load">
+      <div class="row h-100"> 
+        <div class="col-md-12 alert alert-info py-2 my-auto text-center font-lg" role="alert">
+          STATION - LOADING...
+          </div>
+      </div>
     </div>
     <div class="container-fluid" id="station-active" style="display: none;">
       <div class="row">
-        <nav class="navbar navbar-top-scale navbar-dark sticky-top bg-dark p-0 col-md-8 col-lg-8" >
+        <nav class="navbar navbar-top-scale navbar-dark sticky-top bg-dark p-0 col-md-12 col-lg-12" >
             <div class="col-md-7 col-lg-7 mxs-auto text-left">
-              <span class="font-md" id="date-sys">-</span>
+              <div class="font-sml" id="day-sys">-</div>
+              <div class="font-mdl" id="date-sys">-</div>
             </div>
-            <div class="col-md-5 col-lg-5 font-md mxs-auto text-right">
-              <span class="font-lg" id="time-sys">-</span>
+            <div class="col-md-5 col-lg-5 font-mdl mxs-auto text-right">
+              <span class="font-lgl" id="hour-sys">-</span><span class="font-lgl">:</span><span class="font-lgl" id="minute-sys">-</span><span class="font-mdl">:</span><span class="font-mdl" id="second-sys">-</span>
             </div>
         </nav>
       </div>
-      <div class="row">
+      <div class="row" style="display: none;">
         <nav class="col-md-4 col-lg-4 d-none d-md-block bg-dark sidebar collapse">
           <div class="sidebar-sticky">
-            <div class="text-right font-sm" style="height: 120px; color:#FFF;">Flextime QR Code</div>
             <div class="d-flex flex-column h-75">
-              <div class="m-2 flex-grow-1"><button type="button" class="btn btn-primary btn-scale" set="sign-mode"  mode="clock in" userkey="F1">N/A</button></div>
-              <div class="m-2 flex-grow-1"> <button type="button" class="btn btn-secondary btn-scale" set="sign-mode" mode="clock out" userkey="F2">N/A</button></div>
-              <div class="m-2 flex-grow-1"><button type="button" class="btn btn-success btn-scale" set="sign-mode" mode="overtime in" userkey="F3">N/A</button></div>
-              <div class="m-2 flex-grow-1"><button type="button" class="btn btn-warning btn-scale" set="sign-mode" mode="overtime out" userkey="F4">N/A</button></div>
+              <div class="mb-2 flex-grow-1"><button type="button" class="btn btn-primary btn-scale" set="sign-mode"  mode="clock in" userkey="F1">N/A</button></div>
+              <div class="mb-2 flex-grow-1"> <button type="button" class="btn btn-secondary btn-scale" set="sign-mode" mode="clock out" userkey="F2">N/A</button></div>
+              <div class="mb-2 flex-grow-1"><button type="button" class="btn btn-success btn-scale" set="sign-mode" mode="overtime in" userkey="F3">N/A</button></div>
+              <div class="mb-2 flex-grow-1"><button type="button" class="btn btn-warning btn-scale" set="sign-mode" mode="overtime out" userkey="F4">N/A</button></div>
             </div>
           </div>
         </nav>
         <div id="disp-sign-test"></div>
         <main role="main" class="col-md-7 col-lg-8 mr-auto px-2 py-2">
           <div class="alert alert-primary py-2" role="alert" id="disp-status">
-            <!-- A simple primary alert—check it out! -->
+            <!-- Display Status -->
           </div>
           <div class="py-4 section">
               <div id="disp-sign" class="container-fluid">
-                <!-- Display -->
+                <!-- Display Sign-Mode -->
               </div>
           </div>
         </main>
       </div>
       <!--nav bottom-->
       <nav class="navbar navbar-bottom-scale fixed-bottom navbar-expand-sm navbar-dark bg-dark navbar-footing p-1 m-0">
-          <div class="col-sm-8 col-md-8 col-lg-8 mxs-auto pl-1 pr-1 px-0  text-left">
+          <div class="col-sm-8 col-md-8 col-lg-8 mxs-auto pl-1 pr-1 px-0 text-left">
             <p class="p-0 m-0 font-sx">
               <span id="nav-bottom-stationName"></span>
             </p>
@@ -93,8 +97,8 @@
           </div>
     </nav>
     </div>
-    <div class="container-fluid" id="station-in-active" style="display: none;">
-      <div class="alert alert-danger py-2 my-2 text-center font-lg" role="alert">STATION - INACTIVE</div>
+    <div class="container-fluid  h-100" id="station-in-active" style="display: none;">
+      <div class="alert alert-danger py-2 my-auto text-center font-lg" role="alert">STATION - INACTIVE</div>
     </div>
   <script type="text/javascript">
     "use strict";
