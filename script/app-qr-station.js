@@ -100,8 +100,8 @@ class Props {
   //@ +Props.displayScannedSign: แสดงผลการสแกน QR Code เพื่อลงเวลา
   static displayScannedSign(data) {
     let signMode = data.sign.mode.toUpperCase();
-    $(`#${this.opt.disp.sign}`).html(`<span class="font-smb">Time     : </span> <span class="font-smlb text-primary">${data.regisTime}</span><br/>
-    <span class="font-smb">Name  : </span> <span class="font-sml text-primary">${data.fullname} </span><br/>
+    $(`#${this.opt.disp.sign}`).html(`<span class="font-smb">Time     : </span> <span class="font-mdb text-primary">${data.regisTime}</span><br/>
+    <span class="font-smb">Name  : </span> <span class="font-md text-primary">${data.fullname} </span><br/>
     <span class="font-smb">Card Id   : </span> <span class="font-sm text-primary">${ data.cardId} </span><br/>
     <span class="font-smb">Sign Mode : </span> <span class="font-sm text-primary">${data.sign.userkey ? data.sign.userkey.toUpperCase() +" (" + signMode +")": signMode} </span> <br/>
     `);

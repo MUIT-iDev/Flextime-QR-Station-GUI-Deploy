@@ -50,19 +50,20 @@
             </div>
         </nav>
       </div>
-      <div class="row" style="display: none;">
-        <nav class="col-md-4 col-lg-4 d-none d-md-block bg-dark sidebar collapse">
-          <div class="sidebar-sticky">
-            <div class="d-flex flex-column h-75">
-              <div class="mb-2 flex-grow-1"><button type="button" class="btn btn-primary btn-scale" set="sign-mode"  mode="clock in" userkey="F1">N/A</button></div>
-              <div class="mb-2 flex-grow-1"> <button type="button" class="btn btn-secondary btn-scale" set="sign-mode" mode="clock out" userkey="F2">N/A</button></div>
-              <div class="mb-2 flex-grow-1"><button type="button" class="btn btn-success btn-scale" set="sign-mode" mode="overtime in" userkey="F3">N/A</button></div>
-              <div class="mb-2 flex-grow-1"><button type="button" class="btn btn-warning btn-scale" set="sign-mode" mode="overtime out" userkey="F4">N/A</button></div>
+      <div class="row">
+        <!-- Diable sidebar--><div style="display: none">
+          <nav class="d-none d-md-block bg-dark sidebar collapse" >
+            <div class="sidebar-sticky">
+              <div class="d-flex flex-column h-75">
+                <div class="mb-2 flex-grow-1"><button type="button" class="btn btn-primary btn-scale" set="sign-mode"  mode="clock in" userkey="F1">N/A</button></div>
+                <div class="mb-2 flex-grow-1"> <button type="button" class="btn btn-secondary btn-scale" set="sign-mode" mode="clock out" userkey="F2">N/A</button></div>
+                <div class="mb-2 flex-grow-1"><button type="button" class="btn btn-success btn-scale" set="sign-mode" mode="overtime in" userkey="F3">N/A</button></div>
+                <div class="mb-2 flex-grow-1"><button type="button" class="btn btn-warning btn-scale" set="sign-mode" mode="overtime out" userkey="F4">N/A</button></div>
+              </div>
             </div>
-          </div>
-        </nav>
-        <div id="disp-sign-test"></div>
-        <main role="main" class="col-md-7 col-lg-8 mr-auto px-2 py-2">
+          </nav>
+          <!-- Diable sidebar--></div>
+        <main role="main" class="col-md-12 col-lg-12 mr-auto px-2 py-2">
           <div class="alert alert-primary py-2" role="alert" id="disp-status">
             <!-- Display Status -->
           </div>
