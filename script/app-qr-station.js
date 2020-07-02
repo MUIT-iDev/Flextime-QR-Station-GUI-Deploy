@@ -100,7 +100,8 @@ class Props {
   //@ +Props.displayScannedSign: แสดงผลการสแกน QR Code เพื่อลงเวลา
   static displayScannedSign(data) {
     let signMode = data.sign.mode.toUpperCase();
-    $(`#${this.opt.disp.sign}`).html(`<span class="font-smb">Time     : </span> <span class="font-mdb text-primary">${data.regisTime}</span><br/>
+    let time = data.regisTime.split(':');
+    $(`#${this.opt.disp.sign}`).html(`<span class="font-smb">Time     : </span> <span class="font-mdb text-primary">${time[0]}</span><span class="font-mdb text-primary">:${time[1]}</span><span class="font-smb text-primary">:${time[2]}</span><br/>
     <span class="font-smb">Name  : </span> <span class="font-md text-primary">${data.fullname} </span><br/>
     <span class="font-smb">Card Id   : </span> <span class="font-sm text-primary">${ data.cardId} </span><br/>
     <span class="font-smb">Sign Mode : </span> <span class="font-sm text-primary">${data.sign.userkey ? data.sign.userkey.toUpperCase() +" (" + signMode +")": signMode} </span> <br/>
@@ -234,7 +235,7 @@ class AppQRStation {
     SCAN_DELAY_SECOND__MSEC: 1000*7,
     STATION_ACTIVE: true, /**User ser destroy or active station */
     STATION_NAME : "Untitle",
-    SYSTEM_VERSION : "202007021100"
+    SYSTEM_VERSION : "202007021200"
   }
 
   #timerUnDisplayScannedSign = null;
