@@ -196,15 +196,7 @@ class TimeServ {
   //@ TimeServ +properties
   setting = {
     locales: "en-GB",
-    timeId: {
-      hour: "hour-sys",
-      minute: "minute-sys",
-      second: "second-sys"
-    },
-    dateId : {
-      day: "day-sys",
-      date: "date-sys",
-    }
+    //locales: "th-TH",
   };
 
   day = {
@@ -231,19 +223,19 @@ class TimeServ {
   currentTime() {
     let d = new Date();
     let n = d.getDay();
-    let dateString = d.toLocaleString(this.setting.locales);
-
-    //Custom code
-    let formattedString = dateString.replace(", ", " ");
-    let dateList = formattedString.split(" ");
-    let daySys = `${this.day.TH[n]} [${this.day.ENS[n]}]`;
-    let dateSys = dateList[0];
-    let timeSys = dateList[1].split(":");
-    $(`#${this.setting.dateId.day}`).html(daySys);
-    $(`#${this.setting.dateId.date}`).html(dateSys);
-    $(`#${this.setting.timeId.hour}`).html(timeSys[0]);
-    $(`#${this.setting.timeId.minute}`).html(timeSys[1]);
-    $(`#${this.setting.timeId.second}`).html(timeSys[2]);
+    //get Date
+    let dateSys = d.toLocaleDateString(this.setting.locales);
+    //get Day of Week
+    let daySys = this.day.TH[n] + ' ['+ this.day.ENS[n] + ']';
+    //get Time
+    let timeStr = d.toLocaleTimeString(this.setting.locales);
+    let timeSys = timeStr.split(':');
+    //Render Day, Date & Time
+    document.getElementById('day-sys').innerHTML=daySys;
+    document.getElementById('date-sys').innerHTML=dateSys;
+    document.getElementById('hour-sys').innerHTML=timeSys[0];
+    document.getElementById('minute-sys').innerHTML=timeSys[1];
+    document.getElementById('second-sys').innerHTML=timeSys[2];
   }
 
   //@ +TimeServ.clockDisp

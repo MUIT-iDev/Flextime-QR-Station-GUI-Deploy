@@ -235,7 +235,7 @@ class AppQRStation {
     SCAN_DELAY_SECOND__MSEC: 1000*7,
     STATION_ACTIVE: true, /**User ser destroy or active station */
     STATION_NAME : "Untitle",
-    SYSTEM_VERSION : "202007021200"
+    SYSTEM_VERSION : "20200720"
   }
 
   #timerUnDisplayScannedSign = null;
