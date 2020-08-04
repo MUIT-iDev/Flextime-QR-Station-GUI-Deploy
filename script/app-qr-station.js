@@ -1,18 +1,19 @@
 
-/*^
- * QR Station System
- * Author: NRK, 
- * Date: 02-06-2020
- * 
- */
+/*@
+  * QR Station System
+  * Author: NRK, 
+  * Date: 02-06-2020
+  * 
+  */
 
- /*^
- * Modification
- * Author: NRK,
- * Date: 04-08-2020 
- * Add feature apply out-of-service
- * 
- */
+ /* NFEAT-20200408-1
+  * By: NRK
+  * Add-feature apply out-of-service
+  * -
+  * NFEAT-20200408-2
+  * By: NRK
+  * Add-qr context with error
+  */
 
 
 /**
@@ -259,7 +260,7 @@ class AppQRStation {
     SCAN_DELAY_SECOND__MSEC: 1000*7,
     STATION_MODE: Props.consts.STATION_MODE.ACTIVE, /**User ser destroy or active or out-of-service */
     STATION_NAME : "Untitle",
-    SYSTEM_VERSION : "202008041500"
+    SYSTEM_VERSION : "202008041600"
   }
 
   #timerUnDisplayScannedSign = null;
@@ -272,11 +273,19 @@ class AppQRStation {
    
     this.utlServ = new UTLServ();
     this.apiServ = new APIServ({
-      callbackError: ()=> {
-       //refresh UnDisplay signMode
-       this.controlSettedSignMode.refreshUnDisplay();
-       //UnDisplay signMode
-       this.controlSettedSignMode.unDisplay();
+      callbackError: (resp)=> {
+        let data = resp?resp:{};
+        //NFEAT-20200408-2: Add display qr code when error
+        if(data.qr){
+          $(`#${Props.opt.disp.sign}`).html(`<span class="font-sxb">Context  : </span> <span class="font-sx text-danger">${data.qr} </span>`);
+          //UnDiplay scanned-context
+          this.controlScannedSign.refreshUnDisplay();
+          this.controlScannedSign.unDisplay();
+        }
+        //refresh UnDisplay signMode
+        this.controlSettedSignMode.refreshUnDisplay();
+        //UnDisplay signMode
+        this.controlSettedSignMode.unDisplay();
       }
     });
     this.audioRecordSuccess = new Audio("audio/qr-station-scan-success.m4a");
@@ -413,7 +422,8 @@ class AppQRStation {
 
          //GET STATION_MODE
          this.#CONFIG.STATION_MODE = (resp.context.stationMode).toUpperCase();
-
+         
+        //NFEAT-20200408-1
         switch(this.#CONFIG.STATION_MODE){
           case  Props.consts.STATION_MODE.INACTIVE: this.qr.work=false; Props.dispayStationInActive(); break;
           case  Props.consts.STATION_MODE.OUTOFSERVICE: this.qr.work=false; Props.dispayStationOutOfService(); break;

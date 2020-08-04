@@ -97,7 +97,8 @@ class HTTPServ {
             }
             </span><br/>`
         );
-          this.httpSetup.callbackError();
+        
+        this.httpSetup.callbackError();
         
     },
     fail: (jqXHR, textStatus) => {},
@@ -419,7 +420,8 @@ class APIServ extends HTTPServ {
         .html(
           `<span class="text-danger font-sm"> <strong> ${errorTitle}: </strong> ${errorMessage}`
         );
-        this.httpSetup.callbackError();
+        let qr = (resp.qr)?Base64.decode(resp.qr):undefined;
+        this.httpSetup.callbackError({qr});
     } else {
       //Call callback that one is undefined
       if (callback) {
