@@ -70,7 +70,7 @@ class Props {
 
   static dispayStationInActive(){
     $("#station-load").remove();
-    $("#station-out-of-service").show();
+    $("#station-in-active").show();
     $("#station-active").hide();
     $("#station-out-of-sevice").hide();
   }
@@ -259,7 +259,7 @@ class AppQRStation {
     SCAN_DELAY_SECOND__MSEC: 1000*7,
     STATION_MODE: Props.consts.STATION_MODE.ACTIVE, /**User ser destroy or active or out-of-service */
     STATION_NAME : "Untitle",
-    SYSTEM_VERSION : "202008041100"
+    SYSTEM_VERSION : "202008041130"
   }
 
   #timerUnDisplayScannedSign = null;
