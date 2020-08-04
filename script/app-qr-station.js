@@ -1,16 +1,30 @@
 
-/**
+/*^
  * QR Station System
  * Author: NRK, 
  * Date: 02-06-2020
  * 
  */
 
+ /*^
+ * Modification
+ * Author: NRK,
+ * Date: 04-08-2020 
+ * Add feature apply out-of-service
+ * 
+ */
+
+
 /**
  * Class Props
  * - Property of app-qr-station
  */
 class Props {
+
+  //static consts
+  static consts = {
+    STATION_MODE: {ACTIVE:'ACTIVE', INACTIVE:'INACTIVE', OUTOFSERVICE: 'OUTOFSERVICE'}
+  }
 
   //Props +properties (static)
   static prop = {
@@ -51,12 +65,22 @@ class Props {
     $("#station-load").remove();
     $("#station-active").show();
     $("#station-in-active").hide();
+    $("#station-out-of-sevice").hide();
   }
 
   static dispayStationInActive(){
     $("#station-load").remove();
     $("#station-in-active").show();
     $("#station-active").hide();
+    $("#station-out-of-sevice").hide();
+  }
+
+  static dispayStationOutOfService(){
+    $("#station-load").remove();
+    $("#station-out-of-sevice").show();
+    $("#station-in-active").hide();
+    $("#station-active").hide();
+
   }
 
 
@@ -151,7 +175,7 @@ class QR {
   #preventQRScanCount = 0;
   
   //@ QR +properties
-  stationActive = true;
+  work = true;
   preventQRScan = false;
   signMode = Props.opt.sign.IN.mode;
   actionScanDo = undefined; // ({QR.scanned, QR.status}) => { //actionScanDo }
@@ -167,7 +191,7 @@ class QR {
     //###################################//
     //Bind QR-Scanner key each-text-of-code to #scanned and request API-transaction(in setTimeByQRCode function) after end of text-of-code.
     $(document).on("keypress", function (e) {
-      if(self.stationActive){
+      if(self.work){
         if (!self.preventQRScan) {
           if (self.#scanned == "") {
             BlockUI.load({ message: "<h4>Scanning</h4>" });
@@ -233,7 +257,7 @@ class AppQRStation {
     },
     F14_DELAY_SECOND__MSEC: 1000*7,
     SCAN_DELAY_SECOND__MSEC: 1000*7,
-    STATION_ACTIVE: true, /**User ser destroy or active station */
+    STATION_MODE: Props.consts.STATION_MODE.ACTIVE, /**User ser destroy or active or out-of-service */
     STATION_NAME : "Untitle",
     SYSTEM_VERSION : "20200720"
   }
@@ -383,21 +407,18 @@ class AppQRStation {
       ()=>{$("#nav-bottom-load-checkOnline").html("Chk-Onl..").show().fadeOut( 5000, "linear")}
     ).done((resp)=>{
       if(resp.status){
+         Props.displayCheckOnlineData(resp.context);
          //GET STATION_NAME
          this.#CONFIG.STATION_NAME = resp.context.stationName;
 
-         //GET STATION_ACTIVE
-         this.#CONFIG.STATION_ACTIVE = resp.context.stationActive;
+         //GET STATION_MODE
+         this.#CONFIG.STATION_MODE = (resp.context.stationMode).toUpperCase();
 
-         if(!this.#CONFIG.STATION_ACTIVE){
-           Props.dispayStationInActive();
-           this.qr.stationActive = false;
-         }else{
-          Props.dispayStationActive();
-          this.qr.stationActive = true;
-         }
-
-        Props.displayCheckOnlineData(resp.context);
+        switch(this.#CONFIG.STATION_MODE){
+          case  Props.consts.STATION_MODE.INACTIVE: this.qr.work=false; Props.dispayStationInActive(); break;
+          case  Props.consts.STATION_MODE.OUTOFSERVICE: this.qr.work=false; Props.dispayStationOutOfService(); break;
+          default: this.qr.work=true; Props.dispayStationActive();
+        }
       }
     })
   }
